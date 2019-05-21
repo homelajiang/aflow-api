@@ -79,13 +79,13 @@ module.exports = function (options) {
             const previousPost = await Post.find({
                 status: 1,
                 open: {$lt: 2},
-                publish_date: {$lt: current.publish_date}
-            }).sort({publish_date: -1}).limit(1);
+                publish_date: {$gt: current.publish_date}
+            }).sort({publish_date: 1}).limit(1);
             const nextPost = await Post.find({
                 status: 1,
                 open: {$lt: 2},
-                publish_date: {$gt: current.publish_date}
-            }).sort({publish_date: 1}).limit(1);
+                publish_date: {$lt: current.publish_date}
+            }).sort({publish_date: -1}).limit(1);
             respond({
                 previous: previousPost.length > 0 ? previousPost[0].simple_model : null,
                 next: nextPost.length > 0 ? nextPost[0].simple_model : null
