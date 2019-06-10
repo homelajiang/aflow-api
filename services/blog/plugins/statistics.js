@@ -14,15 +14,14 @@ module.exports = function (options) {
     /**
      * 添加访问记录
      */
-    this.add('role:statistics,cmd:add', async (args, respond) => {//异步
+    this.add('role:statistics,cmd:add', (args, respond) => {
         // 添加记录
         try {
-            const res = await new ViewRecord(args.record).save();
-            console.log(res);
-            respond(null);//返回一个参数则为结果，两个参数第一个是错误信息
+            new ViewRecord(args.record).save(); //异步
         } catch (e) {
-            console.log(e);
+            console.error("Statistics Record Error:" + e);
         }
+        respond(null);//返回一个参数则为结果，两个参数第一个是错误信息
     });
 
     /**
