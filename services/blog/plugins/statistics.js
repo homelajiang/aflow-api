@@ -1,5 +1,5 @@
 const Util = require('../../util');
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 const ViewRecord = require('../../../models/view_record');
 const Post = require('../../../models/post');
 const moment = require('moment');

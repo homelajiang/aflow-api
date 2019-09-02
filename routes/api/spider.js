@@ -1,7 +1,7 @@
 const Config = require('../../services/config');
 const Promise = require('bluebird');
 const Bounce = require('bounce');
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 const Joi = require('joi');
 const seneca = require('seneca')()
     .use('basic')

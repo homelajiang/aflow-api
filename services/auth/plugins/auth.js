@@ -1,6 +1,6 @@
 const Auth = require('../../../models/auth');
 const Profile = require('../../../models/profile');
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 const Util = require('../../util');
 
 module.exports = function auth(options) {

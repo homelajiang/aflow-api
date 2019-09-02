@@ -1,6 +1,6 @@
 const Categories = require('../../../models/categories');
 const Util = require('../../util');
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 
 
 module.exports = function (options) {

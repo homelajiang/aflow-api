@@ -1,6 +1,6 @@
 const JWT = require('jsonwebtoken');  // used to sign our content
 const jwtSecret = 'NeverShareYourSecret'; // Never Share This! even in private GitHub repos!
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 const moment = require('moment');
 const default_format = "YYYY-MM-DD HH:mm:ss";
 const date_format = "YYYY-MM-DD";

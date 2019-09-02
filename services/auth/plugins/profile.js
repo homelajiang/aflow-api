@@ -1,5 +1,5 @@
 const Profile = require('../../../models/profile');
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 const Util = require('../../util');
 
 

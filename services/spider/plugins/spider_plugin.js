@@ -29,7 +29,7 @@ log4js.configure({
 });
 var logger = log4js.getLogger("Spider");
 logger.level = 'INFO';
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 
 var opts = {
     useMongoClient: true

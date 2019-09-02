@@ -1,7 +1,7 @@
 const Comment = require('../../../models/comment');
 const Util = require('../../util');
 const Post = require('../../../models/post');
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 
 
 module.exports = function (options) {

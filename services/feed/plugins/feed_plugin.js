@@ -1,5 +1,5 @@
 var Feed = require("../../../models/feed");
-const Boom = require('boom');
+const Boom = require('@hapi/boom');
 
 
 module.exports = function feed_plugin(options) {

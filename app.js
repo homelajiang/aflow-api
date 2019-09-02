@@ -1,7 +1,7 @@
 'use strict';
 const Path = require('path');
 const Hapi = require('hapi');
-const Inert = require('inert');
+const Inert = require('@hapi/inert');
 const routes = require('./routes/api/index');
 
 // Create a server with a host and port
