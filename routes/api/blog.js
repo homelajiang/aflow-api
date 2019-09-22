@@ -37,9 +37,9 @@ module.exports = [
             validate: {
                 payload: {
                     name: Joi.string().required(),
-                    alias: Joi.string().allow(null),
-                    image: Joi.string().allow(null),
-                    description: Joi.string().allow(null)
+                    alias: Joi.string().allow(''),
+                    image: Joi.string().allow(''),
+                    description: Joi.string().allow('')
                 }
             }
         }
