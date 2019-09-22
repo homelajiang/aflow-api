@@ -14,14 +14,14 @@ module.exports = function (options) {
             if (!temp)
                 return respond(Util.generateErr("文章不存在", 404));
 
-            if (!temp.open_comment)
+            if (!temp.openComment)
                 return respond(Util.generateErr("暂不开放评论", 403));
 
             const comment = Comment.getInsertModel(args.comment);
             comment.post = args.id;
 
-            if (temp.need_review)
-                comment.status = 1;//评论待审核
+            if (temp.needReview)
+                comment.status = 'review';//评论待审核
 
             const res = await new Comment(comment).save();
             respond(res.model);
@@ -51,14 +51,31 @@ module.exports = function (options) {
                 const pageSize = parseInt(args.pageSize);
                 const pageNum = parseInt(args.pageNum);
 
-                const type = parseInt(args.type);
-
-
                 let countExec;
                 let listExec;
 
                 if (args.key) {
-                    if (isNaN(type)) {
+                    if (args.type) {
+                        if (args.id) {
+                            countExec = Comment.find({post: args.id, status: args.type})
+                                .or([
+                                    {content: {$regex: new RegExp(args.key, 'i')}}
+                                ]);
+                            listExec = Comment.find({post: args.id, status: args.type})
+                                .or([
+                                    {content: {$regex: new RegExp(args.key, 'i')}}
+                                ]);
+                        } else {
+                            countExec = Comment.find({status: args.type})
+                                .or([
+                                    {content: {$regex: new RegExp(args.key, 'i')}}
+                                ]);
+                            listExec = Comment.find({status: args.type})
+                                .or([
+                                    {content: {$regex: new RegExp(args.key, 'i')}}
+                                ]);
+                        }
+                    } else {
                         if (args.id) {
                             countExec = Comment.find({post: args.id})
                                 .or([
@@ -78,43 +95,23 @@ module.exports = function (options) {
                                     {content: {$regex: new RegExp(args.key, 'i')}}
                                 ]);
                         }
-                    } else {
-                        if (args.id) {
-                            countExec = Comment.find({post: args.id, status: type})
-                                .or([
-                                    {content: {$regex: new RegExp(args.key, 'i')}}
-                                ]);
-                            listExec = Comment.find({post: args.id, status: type})
-                                .or([
-                                    {content: {$regex: new RegExp(args.key, 'i')}}
-                                ]);
-                        } else {
-                            countExec = Comment.find({status: type})
-                                .or([
-                                    {content: {$regex: new RegExp(args.key, 'i')}}
-                                ]);
-                            listExec = Comment.find({status: type})
-                                .or([
-                                    {content: {$regex: new RegExp(args.key, 'i')}}
-                                ]);
-                        }
                     }
                 } else {
-                    if (isNaN(type)) {
+                    if (args.type) {
+                        if (args.id) {
+                            countExec = Comment.find({post: args.id, status: args.type});
+                            listExec = Comment.find({post: args.id, status: args.type});
+                        } else {
+                            countExec = Comment.find({status: args.type});
+                            listExec = Comment.find({status: args.type});
+                        }
+                    } else {
                         if (args.id) {
                             countExec = Comment.find({post: args.id});
                             listExec = Comment.find({post: args.id});
                         } else {
                             countExec = Comment.find({});
                             listExec = Comment.find({});
-                        }
-                    } else {
-                        if (args.id) {
-                            countExec = Comment.find({post: args.id, status: type});
-                            listExec = Comment.find({post: args.id, status: type});
-                        } else {
-                            countExec = Comment.find({status: type});
-                            listExec = Comment.find({status: type});
                         }
                     }
                 }
@@ -123,7 +120,7 @@ module.exports = function (options) {
                 const comments = await listExec.populate("post")
                     .skip((pageNum - 1) * pageSize)
                     .limit(pageSize)
-                    .sort({create_date: -1});
+                    .sort({createDate: -1});
 
                 const tempList = [];
                 comments.forEach((element) => {

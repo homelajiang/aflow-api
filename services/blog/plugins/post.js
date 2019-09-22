@@ -90,19 +90,35 @@ module.exports = function (options) {
         }
     });
 
-//查询post列表
+    //查询post列表
     this.add('role:post,cmd:list', async (args, respond) => {
         try {
             const pageSize = parseInt(args.pageSize);
             const pageNum = parseInt(args.pageNum);
 
-            const type = parseInt(args.type);
-
             let count;
             let posts;
             // type 为1 已发表 没有type查询所有
             if (args.key) {
-                if (isNaN(type)) {//没有type
+                if(args.type){
+                    count = await Post.find({status: args.type})
+                        .or([
+                            {title: {$regex: new RegExp(args.key, 'i')}},
+                            {description: {$regex: new RegExp(args.key, 'i')}}
+                        ])
+                        .countDocuments();
+
+                    posts = await Post.find({status: args.type})
+                        .or([
+                            {title: {$regex: new RegExp(args.key, 'i')}},
+                            {description: {$regex: new RegExp(args.key, 'i')}}
+                        ])
+                        .populate('categories')
+                        .populate('tags')
+                        .skip((pageNum - 1) * pageSize)
+                        .limit(pageSize)
+                        .sort({createDate: -1});
+                }else {
                     count = await Post.find()
                         .or([
                             {title: {$regex: new RegExp(args.key, 'i')}},
@@ -119,121 +135,68 @@ module.exports = function (options) {
                         .populate('tags')
                         .skip((pageNum - 1) * pageSize)
                         .limit(pageSize)
-                        .sort({create_date: -1});
-                } else if (type === 1) {
-                    count = await Post.find({status: type})
-                        .or([
-                            {title: {$regex: new RegExp(args.key, 'i')}},
-                            {description: {$regex: new RegExp(args.key, 'i')}}
-                        ])
-                        .countDocuments();
-
-                    posts = await Post.find({status: type})
-                        .or([
-                            {title: {$regex: new RegExp(args.key, 'i')}},
-                            {description: {$regex: new RegExp(args.key, 'i')}}
-                        ])
-                        .populate('categories')
-                        .populate('tags')
-                        .skip((pageNum - 1) * pageSize)
-                        .limit(pageSize)
-                        .sort({publish_date: -1});
-                } else {
-                    count = await Post.find({status: type})
-                        .or([
-                            {title: {$regex: new RegExp(args.key, 'i')}},
-                            {description: {$regex: new RegExp(args.key, 'i')}}
-                        ])
-                        .countDocuments();
-
-                    posts = await Post.find({status: type})
-                        .or([
-                            {title: {$regex: new RegExp(args.key, 'i')}},
-                            {description: {$regex: new RegExp(args.key, 'i')}}
-                        ])
-                        .populate('categories')
-                        .populate('tags')
-                        .skip((pageNum - 1) * pageSize)
-                        .limit(pageSize)
-                        .sort({create_date: -1});
+                        .sort({createDate: -1});
                 }
             } else {
-                if (isNaN(type)) {//没有type
+                if(args.type){
+                    count = await Post.find({status: args.type}).countDocuments();
+                    posts = await Post.find({status: args.type})
+                        .populate('categories')
+                        .populate('tags')
+                        .skip((pageNum - 1) * pageSize)
+                        .limit(pageSize)
+                        .sort({createDate: -1});
+                }else {
                     count = await Post.find().countDocuments();
                     posts = await Post.find()
                         .populate('categories')
                         .populate('tags')
                         .skip((pageNum - 1) * pageSize)
                         .limit(pageSize)
-                        .sort({create_date: -1});
-                } else if (type === 1) {
-                    count = await Post.find({status: type}).countDocuments();
-                    posts = await Post.find({status: type})
-                        .populate('categories')
-                        .populate('tags')
-                        .skip((pageNum - 1) * pageSize)
-                        .limit(pageSize)
-                        .sort({publish_date: -1});
-                } else {
-                    count = await Post.find({status: type}).countDocuments();
-                    posts = await Post.find({status: type})
-                        .populate('categories')
-                        .populate('tags')
-                        .skip((pageNum - 1) * pageSize)
-                        .limit(pageSize)
-                        .sort({create_date: -1});
+                        .sort({createDate: -1});
                 }
             }
             const tempList = [];
             posts.forEach((element) => {
-                tempList.push(element.list_model);
+                let temp = element.model;
+                delete temp.content;
+                tempList.push(temp);
             });
-            respond(null, Util.generatePageModel(pageSize, pageNum, count, tempList));
+            respond(Util.generatePageModel(pageSize, pageNum, count, tempList));
         } catch (e) {
             respond(Util.generateErr("查询失败"));
         }
     });
 
-
     //删除post
     this.add('role:post,cmd:remove', async (args, respond) => {
-        // Post.remove({_id: {$in: JSON.parse(msg.ids)}}, respond);
         try {
             const res = await Post.findOneAndDelete({_id: args.id});
-            if (res) {
-                respond(res.model);
-            } else {
-                respond(Util.generateErr("该文章不存在", 404))
-            }
+            res ? respond() : respond(Util.generateErr("该文章不存在", 404));
         } catch (e) {
             respond(Util.generateErr("删除失败"));
         }
     });
 
-    //更新post
+    /**
+     * 更新post
+     * 来什么字段修改什么字段
+     * 只有从未发布到发布时才修改发布日期
+     */
     this.add('role:post,cmd:update', async (args, respond) => {
         try {
 
-            // 发布日期不能更改，只能更在修改日期
             const temp = await Post.findOne({_id: args.id});
 
             if (!temp) {
-                respond(Util.generateErr("该文章不存在", 404))
+                respond(Util.generateErr("该文章不存在", 404));
                 return;
             }
 
             const updateModel = Post.getUpdateModel(args.post);
 
-            // 当第一次发布并且没有发不过，设置发布日期和修改日期相同，其他情况不允许修改发布日期
-            if (!temp.publish_date && updateModel.status === 1) {
-                updateModel.publish_date = updateModel.modify_date;
-            }
-
-            await Post.updateOne({_id: args.id}, updateModel);
-            const post = await Post.findOne({_id: args.id})
-                .populate('categories')
-                .populate('tags');
-            respond(post.model);
+            const res = await Post.updateOne({_id: args.id}, {$set: updateModel});
+            res ? respond() : respond(Util.generateErr("更新失败", 400))
         } catch (e) {
             respond(Util.generateErr("更新失败"));
         }

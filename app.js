@@ -63,7 +63,7 @@ const init = async () => {
         }
     });
 
-    server.auth.default('jwt-strategy');
+    // server.auth.default('jwt-strategy');
 
     server.route(require('./routes/index'));// TODO 接口默认返回信息
 

@@ -16,24 +16,13 @@ module.exports = {
             status: auth.status
         }, jwtSecret);
     },
-    generateBoom: function (res) {
-        return Boom.boomify(new Error(res.message), {statusCode: res.code});
-    },
-    ifErrorBoom: function (res, code, h) {
-        if (code) {
-            if (res.error)
-                return this.generateBoom(res);
-            return h.response("").code(204);
+    response: function (res, h) {
+        if (res) {
+            return res.error ? Boom.boomify(new Error(res.message), {statusCode: res.code}) : res;
         } else {
-            if (res.error)
-                return this.generateBoom(res);
-            return res;
+            // 没有响应体的成功请求
+            return h ? h.response('').code(204) : '';
         }
-    },
-    errorToBoom: function (err) {
-        if (!Boom.isBoom(err))
-            return Boom.badRequest();
-        return err;
     },
 
     validateErr: (request, h, err) => {

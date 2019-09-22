@@ -1,31 +1,24 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const Categories = require('./categories');
-const Tag = require('./tag');
-const Profile = require('./profile');
 const Util = require('../libs/util');
 
-const DRAFT = 0;
-const PUBLISHED = 1;
-const DELETED = -1;
-
 const PostSchema = new Schema({
-    title: {type: String, default: ""},
-    description: {type: String, default: ""},
-    content: {type: String, default: ""},
-    create_date: {type: Date},
-    modify_date: {type: Date},
-    publish_date: {type: Date},
-    cover: {type: String, default: null},
-    stick: {type: Boolean, default: false}, //置顶
-    open: {type: Number, default: 0},//公开性 0 公开  1 密码保护 2 私密
-    password: {type: String, default: '000000'},//保护密码
-    open_comment: {type: Boolean, default: true},//是否开放评论
-    need_review: {type: Boolean, default: false},//评论是否需要审核
-    tags: [{type: Schema.Types.ObjectId, ref: 'Tag'}],
+    title: {type: String},
+    description: {type: String},
+    content: {type: String},
+    createDate: {type: Date},
+    modifyDate: {type: Date},
+    publishDate: {type: Date},
+    cover: {type: String},
+    top: {type: Boolean}, //置顶
+    open: {type: String},//公开性 0 公开  1 密码保护 2 私密
+    password: {type: String},//保护密码
+    openComment: {type: Boolean},//是否开放评论
+    needReview: {type: Boolean},//评论是否需要审核
+    tag: [{type: Schema.Types.ObjectId, ref: 'Tag'}],
     categories: {type: Schema.Types.ObjectId, ref: 'Categories'},
-    status: {type: Number, default: DRAFT},//0 草稿，1 已发布 -1 已删除
+    status: {type: String},//draft 草稿，published 已发布 deleted 已删除
 }, {
     versionKey: false // You should be aware of the outcome after set to false
 });
@@ -37,96 +30,15 @@ PostSchema.virtual('model')
             title: this.title,
             description: this.description,
             content: this.content,
-            create_date: Util.defaultFormat(this.create_date),
-            modify_date: Util.defaultFormat(this.modify_date),
-            publish_date: Util.defaultFormat(this.publish_date),
+            createDate: Util.defaultFormat(this.createDate),
+            modifyDate: Util.defaultFormat(this.modifyDate),
+            publishDate: Util.defaultFormat(this.publishDate),
             stick: this.stick,
             open: this.open,
             cover: this.cover,
             password: this.password,
-            open_comment: this.open_comment,
-            need_review: this.need_review,
-            status: this.status
-        };
-        temp.categories = this.categories ? this.categories.model : null;
-        const t = [];
-        if (this.tags) {
-            this.tags.forEach((tag) => {
-                t.push(tag.model);
-            });
-        }
-        temp.tags = t;
-        return temp;
-    });
-
-PostSchema.virtual('simple_model')
-    .get(function () {
-        return {
-            id: this.id,
-            title: this.title,
-            description: this.description,
-            cover: this.cover,
-            status: this.status,
-            create_date: Util.defaultFormat(this.create_date),
-            modify_date: Util.defaultFormat(this.modify_date),
-            publish_date: Util.defaultFormat(this.publish_date),
-        };
-    });
-
-PostSchema.virtual('archive_model')
-    .get(function () {
-        return {
-            id: this.id,
-            title: this.title,
-            description: this.description,
-            cover: this.cover,
-            status: this.status,
-            create_date: Util.dateFormat(this.create_date),
-            modify_date: Util.dateFormat(this.modify_date),
-            publish_date: Util.dateFormat(this.publish_date),
-        };
-    });
-
-PostSchema.virtual('blog_model')
-    .get(function () {
-        const temp = {
-            id: this.id,
-            title: this.title,
-            description: this.description,
-            content: this.content,
-            create_date: Util.defaultFormat(this.create_date),
-            modify_date: Util.defaultFormat(this.modify_date),
-            publish_date: Util.defaultFormat(this.publish_date),
-            stick: this.stick,
-            open: this.open,
-            cover: this.cover,
-            open_comment: this.open_comment
-        };
-        temp.categories = this.categories ? this.categories.model : null;
-        const t = [];
-        if (this.tags) {
-            this.tags.forEach((tag) => {
-                t.push(tag.model);
-            });
-        }
-        temp.tags = t;
-        return temp;
-    });
-
-PostSchema.virtual('list_model')
-    .get(function () {
-        const temp = {
-            id: this.id,
-            title: this.title,
-            description: this.description,
-            content: null,
-            create_date: Util.defaultFormat(this.create_date),
-            modify_date: Util.defaultFormat(this.modify_date),
-            publish_date: Util.defaultFormat(this.publish_date),
-            stick: this.stick,
-            open: this.open,
-            cover: this.cover,
-            open_comment: this.open_comment,
+            openComment: this.openComment,
+            needReview: this.needReview,
             status: this.status
         };
         temp.categories = this.categories ? this.categories.model : null;
@@ -142,50 +54,48 @@ PostSchema.virtual('list_model')
 
 PostSchema.static({
     getInsertModel: function (model) {
-        let temp = {};
-        temp.title = model.title;
-        temp.description = model.description;
-        temp.content = model.content;
-        temp.open = model.open;
-        temp.password = model.password;
-        temp.open_comment = model.open_comment;
-        temp.need_review = model.need_review;
-        temp.stick = model.stick;
-        temp.cover = model.cover;
-        temp.tags = model.tags;
-        model.categories ? temp.categories = model.categories : temp.categories = null;
-
-        let date = new Date();
-        temp.create_date = date;
-        temp.modify_date = date;
-
-        if (model.status === 1) {//立即发布
-            temp.status = PUBLISHED;
-            temp.publish_date = date;
-        } else {//其他情况为草稿
-            temp.status = DRAFT;
-        }
-        return temp;
+        const date = new Date();
+        return {
+            title: model.title ? model.title : '未命名文章',
+            description: model.description ? model.description : '',
+            content: model.content ? model.content : '',
+            createDate: date,
+            modifyDate: date,
+            publishDate: date,
+            cover: model.cover ? model.cover : null,
+            top: !!model.top,
+            open: model.open ? model.open : 'public',
+            password: model.password ? model.password : '',
+            openComment: !!model.openComment,
+            needReview: !!model.needReview,
+            tag: model.tag ? model.tag : [],
+            categories: model.categories ? model.categories : null,
+            status: model.status ? model.status : 'draft'
+        };
     },
     getUpdateModel: function (model) {
-        let current_date = new Date();
-
-        let temp = {
-            modify_date: current_date//默认的修改时间
+        const date = new Date();
+        const temp = {
+            modifyDate: date
         };
 
-        temp.title = model.title;
-        temp.description = model.description;
-        temp.content = model.content;
-        temp.open = model.open;
-        temp.cover = model.cover;
-        temp.password = model.password;
-        temp.open_comment = model.open_comment;
-        temp.need_review = model.need_review;
-        temp.tags = model.tags;
-        temp.stick = model.stick;
-        model.categories ? temp.categories = model.categories : temp.categories = null;
-        temp.status = model.status;
+        model.hasOwnProperty('title') ? temp.title = model.title : '';
+        model.hasOwnProperty('description') ? temp.description = model.description : '';
+        model.hasOwnProperty('content') ? temp.content = model.content : '';
+        model.hasOwnProperty('cover') ? temp.cover = model.cover : '';
+        model.hasOwnProperty('top') ? temp.top = model.top : '';
+        model.hasOwnProperty('open') ? temp.open = model.open : '';
+        model.hasOwnProperty('password') ? temp.password = model.password : '';
+        model.hasOwnProperty('openComment') ? temp.openComment = model.openComment : '';
+        model.hasOwnProperty('needReview') ? temp.needReview = model.needReview : '';
+        model.hasOwnProperty('tag') ? temp.tag = model.tag : '';
+        model.hasOwnProperty('categories') ? temp.categories = model.categories : '';
+        model.hasOwnProperty('status') ? temp.status = model.status : '';
+
+        // 发布原状态不为已发布的文章时更新发布时间
+        if (this.status !== 'published' && model.status === 'published') {
+            model.publishDate = date;
+        }
         return temp;
     },
 

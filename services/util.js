@@ -20,7 +20,9 @@ module.exports = {
         temp.nextPage = temp.hasNextPage ? temp.pageNum + 1 : temp.pageNum;
 
         return temp;
-    },//生成错误信息
+    },
+
+    //生成错误信息
     generateErr: function (msg, code) {
         return {
             code: code ? code : "400",
@@ -28,6 +30,7 @@ module.exports = {
             message: msg ? msg : "请求错误"
         }
     },
+
     //获取一周的开始时间和结束时间
     getWeekRange: function (year, month, nowDay, dayOfWeek, index, sundayFirst) {
         if (sundayFirst) {
@@ -40,6 +43,7 @@ module.exports = {
             return [start, end];
         }
     },
+
     //获取一天的开始时间和结束时间
     getDayRange: function (nowDate, index) {
         let temp = new Date(nowDate.getTime());
