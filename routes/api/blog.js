@@ -19,102 +19,6 @@ const act = Promise.promisify(seneca.act, {context: seneca});
 
 module.exports = [
     {
-        method: 'POST',
-        path: UtilApi.api_v1 + '/tag',
-        handler: async (request, h) => {
-            try {
-                const res = await act({
-                    role: "tag",
-                    cmd: 'add',
-                    tag: request.payload
-                });
-                return Util.response(res,h);
-            } catch (err) {
-                return Boom.badRequest();
-            }
-        },
-        config: {
-            validate: {
-                payload: {
-                    name: Joi.string().required(),
-                    alias: Joi.string().allow(''),
-                    image: Joi.string().allow(''),
-                    description: Joi.string().allow('')
-                }
-            }
-        }
-    },
-    {
-        method: 'DELETE',
-        path: UtilApi.api_v1 + '/tag/{id}',
-        handler: async (request, h) => {
-            try {
-                const res = await act({
-                    role: "tag",
-                    cmd: 'remove',
-                    id: request.params.id
-                });
-                return Util.response(res,h);
-            } catch (err) {
-                return Boom.badRequest();
-            }
-        },
-        config: {
-            validate: {
-                params: {
-                    id: Joi.string().required()
-                }
-            }
-        }
-    },
-    {
-        method: 'POST',
-        path: UtilApi.api_v1 + '/tag/{id}',
-        handler: async (request, h) => {
-            try {
-                const res = await act({
-                    role: "tag",
-                    cmd: 'update',
-                    id: request.params.id,
-                    tag: request.payload
-                });
-                return Util.response(res,h);
-            } catch (err) {
-                return Boom.badRequest();
-            }
-        },
-        config: {
-            validate: {
-                params: {
-                    id: Joi.string().required()
-                }
-            }
-        }
-    },
-    {
-        method: 'GET',
-        path: UtilApi.api_v1 + '/tag/{id}',
-        handler: async (request, h) => {
-            try {
-                const res = await act({
-                    role: "tag",
-                    cmd: 'query',
-                    id: request.params.id
-                });
-                return Util.response(res,h);
-            } catch (err) {
-                return Boom.badRequest();
-            }
-        },
-        config: {
-            validate: {
-                params: {
-                    id: Joi.string().required()
-                }
-            }
-        }
-    },
-    {
         method: "GET",
         path: UtilApi.api_v1 + '/tag',
         handler: async (request, h) => {
@@ -284,9 +188,9 @@ module.exports = [
         config: {
             validate: {
                 payload: {
-                    title: Joi.string(),
-                    content: Joi.string(),
-                    description: Joi.string(),
+                    title: Joi.string().allow(''),
+                    content: Joi.string().allow(''),
+                    description: Joi.string().allow(''),
                     open: Joi.string().valid('private', 'public', 'protect'),
                     status: Joi.string().valid('draft','published','deleted'),
                     password: Joi.string(),
@@ -294,8 +198,8 @@ module.exports = [
                     needReview: Joi.boolean(),
                     top: Joi.boolean(),
                     tags: Joi.array(),
-                    cover: Joi.string(),
-                    categories: Joi.string()
+                    cover: Joi.string().allow(''),
+                    categories: Joi.string().allow('')
                 },
                 failAction: async (request, h, err) => {
                     if (err.isJoi) {
@@ -351,18 +255,18 @@ module.exports = [
                     id: Joi.string().required()
                 },
                 payload: {
-                    title: Joi.string(),
-                    content: Joi.string(),
-                    description: Joi.string(),
+                    title: Joi.string().allow(''),
+                    content: Joi.string().allow(''),
+                    description: Joi.string().allow(''),
                     open: Joi.string().valid('private', 'public', 'protect'),
                     status: Joi.string().valid('draft','published','deleted'),
-                    password: Joi.string(),
+                    password: Joi.string().allow(''),
                     openComment: Joi.boolean(),
                     needReview: Joi.boolean(),
                     top: Joi.boolean(),
                     tags: Joi.array(),
-                    cover: Joi.string(),
-                    categories: Joi.string()
+                    cover: Joi.string().allow(''),
+                    categories: Joi.string().allow('')
                 }
             }
         }

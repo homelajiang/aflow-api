@@ -2,7 +2,6 @@
 // 为blog前端提供数据
 
 const Post = require('../../../models/post');
-const Tag = require('../../../models/tag');
 const Comment = require('../../../models/comment');
 const Categories = require('../../../models/categories');
 const Util = require('../../util');
@@ -19,7 +18,6 @@ module.exports = function (options) {
             const count = await Post.find({status: 1, open: {$lt: 2}}).countDocuments();
             const posts = await Post.find({status: 1, open: {$lt: 2}})
                 .populate('categories')
-                .populate('tags')
                 .skip((pageNum - 1) * pageSize)
                 .limit(pageSize)
                 .sort({publish_date: -1});
@@ -60,8 +58,7 @@ module.exports = function (options) {
     this.add('role:blog,cmd:post_info', async (args, respond) => {
         try {
             const post = await Post.findById(args.id)
-                .populate('categories')
-                .populate('tags');
+                .populate('categories');
             // 文章存在，并且文章已发布
             if (post && post.status === 1) {
                 respond(post.blog_model);

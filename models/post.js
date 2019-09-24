@@ -16,7 +16,7 @@ const PostSchema = new Schema({
     password: {type: String},//保护密码
     openComment: {type: Boolean},//是否开放评论
     needReview: {type: Boolean},//评论是否需要审核
-    tag: [{type: Schema.Types.ObjectId, ref: 'Tag'}],
+    tag: [{type: String}],
     categories: {type: Schema.Types.ObjectId, ref: 'Categories'},
     status: {type: String},//draft 草稿，published 已发布 deleted 已删除
 }, {
@@ -39,16 +39,10 @@ PostSchema.virtual('model')
             password: this.password,
             openComment: this.openComment,
             needReview: this.needReview,
-            status: this.status
+            status: this.status,
+            tags: this.tags
         };
         temp.categories = this.categories ? this.categories.model : null;
-        const t = [];
-        if (this.tags) {
-            this.tags.forEach((tag) => {
-                t.push(tag.model);
-            });
-        }
-        temp.tags = t;
         return temp;
     });
 
@@ -62,7 +56,7 @@ PostSchema.static({
             createDate: date,
             modifyDate: date,
             publishDate: date,
-            cover: model.cover ? model.cover : null,
+            cover: model.cover ? model.cover : '',
             top: !!model.top,
             open: model.open ? model.open : 'public',
             password: model.password ? model.password : '',

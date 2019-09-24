@@ -1,5 +1,4 @@
 const Post = require('../../../models/post');
-const Tag = require('../../../models/tag');
 const Categories = require('../../../models/categories');
 const Util = require('../../util');
 /*const async = require('async');
@@ -78,8 +77,7 @@ module.exports = function (options) {
     this.add('role:post,cmd:query', async (args, respond) => {
         try {
             const post = await Post.findById(args.id)
-                .populate('categories')
-                .populate('tags');
+                .populate('categories');
             if (post) {
                 respond(post.model);
             } else {
@@ -114,7 +112,6 @@ module.exports = function (options) {
                             {description: {$regex: new RegExp(args.key, 'i')}}
                         ])
                         .populate('categories')
-                        .populate('tags')
                         .skip((pageNum - 1) * pageSize)
                         .limit(pageSize)
                         .sort({createDate: -1});
@@ -132,7 +129,6 @@ module.exports = function (options) {
                             {description: {$regex: new RegExp(args.key, 'i')}}
                         ])
                         .populate('categories')
-                        .populate('tags')
                         .skip((pageNum - 1) * pageSize)
                         .limit(pageSize)
                         .sort({createDate: -1});
@@ -142,7 +138,6 @@ module.exports = function (options) {
                     count = await Post.find({status: args.type}).countDocuments();
                     posts = await Post.find({status: args.type})
                         .populate('categories')
-                        .populate('tags')
                         .skip((pageNum - 1) * pageSize)
                         .limit(pageSize)
                         .sort({createDate: -1});
@@ -150,7 +145,6 @@ module.exports = function (options) {
                     count = await Post.find().countDocuments();
                     posts = await Post.find()
                         .populate('categories')
-                        .populate('tags')
                         .skip((pageNum - 1) * pageSize)
                         .limit(pageSize)
                         .sort({createDate: -1});
