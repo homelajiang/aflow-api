@@ -16,7 +16,7 @@ const PostSchema = new Schema({
     password: {type: String},//保护密码
     openComment: {type: Boolean},//是否开放评论
     needReview: {type: Boolean},//评论是否需要审核
-    tag: [{type: String}],
+    tags: [{type: String}],
     categories: {type: Schema.Types.ObjectId, ref: 'Categories'},
     status: {type: String},//draft 草稿，published 已发布 deleted 已删除
 }, {
@@ -62,7 +62,7 @@ PostSchema.static({
             password: model.password ? model.password : '',
             openComment: !!model.openComment,
             needReview: !!model.needReview,
-            tag: model.tag ? model.tag : [],
+            tags: model.tags ? model.tags : [],
             categories: model.categories ? model.categories : null,
             status: model.status ? model.status : 'draft'
         };
@@ -82,8 +82,8 @@ PostSchema.static({
         model.hasOwnProperty('password') ? temp.password = model.password : '';
         model.hasOwnProperty('openComment') ? temp.openComment = model.openComment : '';
         model.hasOwnProperty('needReview') ? temp.needReview = model.needReview : '';
-        model.hasOwnProperty('tag') ? temp.tag = model.tag : '';
-        model.hasOwnProperty('categories') ? temp.categories = model.categories : '';
+        model.hasOwnProperty('tag') ? temp.tags = model.tags : '';
+        model.hasOwnProperty('categories') ? (temp.categories = model.categories ? model.categories : null) : '';
         model.hasOwnProperty('status') ? temp.status = model.status : '';
 
         // 发布原状态不为已发布的文章时更新发布时间

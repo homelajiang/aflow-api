@@ -30,7 +30,7 @@ module.exports = [
                     pageNum: request.query.pageNum,
                     key: request.query.key
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -56,7 +56,7 @@ module.exports = [
                     cmd: 'add',
                     categories: request.payload
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -82,7 +82,7 @@ module.exports = [
                     cmd: 'remove',
                     id: request.params.id
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -106,7 +106,7 @@ module.exports = [
                     id: request.params.id,
                     categories: request.payload
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -129,7 +129,7 @@ module.exports = [
                     cmd: 'query',
                     id: request.params.id
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -154,7 +154,7 @@ module.exports = [
                     pageNum: request.query.pageNum,
                     key: request.query.key
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -180,7 +180,7 @@ module.exports = [
                     cmd: 'add',
                     post: request.payload
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -192,8 +192,8 @@ module.exports = [
                     content: Joi.string().allow(''),
                     description: Joi.string().allow(''),
                     open: Joi.string().valid('private', 'public', 'protect'),
-                    status: Joi.string().valid('draft','published','deleted'),
-                    password: Joi.string(),
+                    status: Joi.string().valid('draft', 'published', 'deleted'),
+                    password: Joi.string().allow(''),
                     openComment: Joi.boolean(),
                     needReview: Joi.boolean(),
                     top: Joi.boolean(),
@@ -220,7 +220,7 @@ module.exports = [
                     cmd: 'remove',
                     id: request.params.id
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -244,7 +244,7 @@ module.exports = [
                     id: request.params.id,
                     post: request.payload
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -255,18 +255,28 @@ module.exports = [
                     id: Joi.string().required()
                 },
                 payload: {
+                    id: Joi.string(), // 不会更新
                     title: Joi.string().allow(''),
                     content: Joi.string().allow(''),
                     description: Joi.string().allow(''),
                     open: Joi.string().valid('private', 'public', 'protect'),
-                    status: Joi.string().valid('draft','published','deleted'),
+                    status: Joi.string().valid('draft', 'published', 'deleted'),
                     password: Joi.string().allow(''),
                     openComment: Joi.boolean(),
                     needReview: Joi.boolean(),
                     top: Joi.boolean(),
                     tags: Joi.array(),
                     cover: Joi.string().allow(''),
-                    categories: Joi.string().allow('')
+                    categories: Joi.string().allow(''),
+                    createDate: Joi.string().allow(''), // 不会更新
+                    modifyDate: Joi.string().allow(''), // 不会更新
+                    publishDate: Joi.string().allow(''), // 不会更新
+                },
+                failAction: async (request, h, err) => {
+                    if (err.isJoi) {
+                        console.log(err.message);
+                    }
+                    throw err;
                 }
             }
         }
@@ -281,7 +291,7 @@ module.exports = [
                     cmd: 'query',
                     id: request.params.id
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -307,7 +317,7 @@ module.exports = [
                     key: request.query.key,
                     type: request.query.type
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (err) {
                 return Boom.badRequest();
             }
@@ -318,7 +328,7 @@ module.exports = [
                     pageSize: Joi.number().default(10),
                     pageNum: Joi.number().default(1),
                     key: Joi.string(),
-                    type: Joi.string().valid('draft','published','deleted')
+                    type: Joi.string().valid('draft', 'published', 'deleted')
                 }
             }
         }
@@ -339,7 +349,7 @@ module.exports = [
                         id: request.params.id,
                         comment: request.payload
                     });
-                    return Util.response(res,h);
+                    return Util.response(res, h);
                 } catch (err) {
                     return Boom.badRequest();
                 }
@@ -366,7 +376,7 @@ module.exports = [
                         cmd: 'remove',
                         id: request.params.id
                     });
-                    return Util.response(res,h);
+                    return Util.response(res, h);
                 } catch (err) {
                     return Boom.badRequest();
                 }
@@ -393,7 +403,7 @@ module.exports = [
                         id: request.params.id,
                         comment: request.payload
                     });
-                    return Util.response(res,h);
+                    return Util.response(res, h);
                 } catch (err) {
                     return Boom.badRequest();
                 }
@@ -424,7 +434,7 @@ module.exports = [
                         cmd: 'query',
                         id: request.params.id
                     });
-                    return Util.response(res,h);
+                    return Util.response(res, h);
                 } catch (err) {
                     return Boom.badRequest();
                 }
@@ -455,7 +465,7 @@ module.exports = [
                         key: request.query.key,
                         type: request.query.type
                     });
-                    return Util.response(res,h);
+                    return Util.response(res, h);
                 } catch (err) {
                     return Boom.badRequest();
                 }
@@ -468,7 +478,7 @@ module.exports = [
                         pageNum: Joi.number().default(1),
                         key: Joi.string(),
                         postId: Joi.string(),
-                        type: Joi.string().valid('review','published','deleted')
+                        type: Joi.string().valid('review', 'published', 'deleted')
                     },
                     failAction: Util.validateErr
                 }
@@ -486,7 +496,7 @@ module.exports = [
                         role: 'statistics',
                         cmd: 'all'
                     });
-                    return Util.response(res,h);
+                    return Util.response(res, h);
                 } catch (err) {
                     return Boom.badRequest();
                 }
@@ -513,7 +523,7 @@ module.exports = [
                         pageNum: request.query.pageNum,
                         type: 1
                     });
-                    return Util.response(res,h);
+                    return Util.response(res, h);
                 } catch (err) {
                     return Boom.badRequest();
                 }
@@ -542,7 +552,7 @@ module.exports = [
                     limit: request.query.limit,
                     range: request.query.sort_range
                 });
-                return Util.response(res,h);
+                return Util.response(res, h);
             } catch (e) {
                 return Util.errorToBoom(e);
             }

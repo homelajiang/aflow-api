@@ -67,7 +67,7 @@ module.exports = function (options) {
     this.add('role:post,cmd:add', async (args, respond) => {
         try {
             const post = await new Post(Post.getInsertModel(args.post)).save();
-            respond(post.model);
+            respond({id: post._id});
         } catch (e) {
             respond(Util.generateErr("创建文章失败"));
         }
@@ -98,7 +98,7 @@ module.exports = function (options) {
             let posts;
             // type 为1 已发表 没有type查询所有
             if (args.key) {
-                if(args.type){
+                if (args.type) {
                     count = await Post.find({status: args.type})
                         .or([
                             {title: {$regex: new RegExp(args.key, 'i')}},
@@ -115,7 +115,7 @@ module.exports = function (options) {
                         .skip((pageNum - 1) * pageSize)
                         .limit(pageSize)
                         .sort({createDate: -1});
-                }else {
+                } else {
                     count = await Post.find()
                         .or([
                             {title: {$regex: new RegExp(args.key, 'i')}},
@@ -134,14 +134,14 @@ module.exports = function (options) {
                         .sort({createDate: -1});
                 }
             } else {
-                if(args.type){
+                if (args.type) {
                     count = await Post.find({status: args.type}).countDocuments();
                     posts = await Post.find({status: args.type})
                         .populate('categories')
                         .skip((pageNum - 1) * pageSize)
                         .limit(pageSize)
                         .sort({createDate: -1});
-                }else {
+                } else {
                     count = await Post.find().countDocuments();
                     posts = await Post.find()
                         .populate('categories')
