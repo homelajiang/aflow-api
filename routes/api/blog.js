@@ -484,7 +484,8 @@ module.exports = [
                 }
             }
     },
-    //获取博客数量统计
+    // =====================================================================================================
+    //获取统计结果
     {
         method: "GET",
         path:
@@ -494,19 +495,51 @@ module.exports = [
                 try {
                     const res = await act({
                         role: 'statistics',
-                        cmd: 'all'
+                        cmd: 'count',
+                        type: request.query.type
                     });
                     return Util.response(res, h);
                 } catch (err) {
                     return Boom.badRequest();
                 }
             },
-        config:
-            {
-                validate: {
-                    failAction: Util.validateErr
-                }
+        config: {
+            validate: {
+                query: {
+                    type: Joi.string().valid(['view', 'comment']).default('view'),
+                },
+                failAction: Util.validateErr
             }
+        }
+    },
+    //获取文章排行按照(评论数/访问量)
+    {
+        method: 'GET',
+        path: UtilApi.api_v1 + '/statistics/post',
+        handler: async (request, h) => {
+            try {
+                const res = await act({
+                    role: 'statistics',
+                    cmd: 'post',
+                    type: request.query.type,
+                    limit: request.query.limit,
+                    range: request.query.rang
+                });
+                return Util.response(res, h);
+            } catch (e) {
+                return Util.response();
+            }
+        },
+        config: {
+            validate: {
+                query: {
+                    limit: Joi.number().integer().default(5),
+                    type: Joi.string().valid(['view', 'comment']).default('view'),
+                    rang: Joi.string().valid(['day', 'three day', 'week', 'month', 'year', 'all']).default('week')
+                },
+                failAction: Util.validateErr
+            }
+        }
     },
     //获取待处理事项（主要是审批回复）
     {
@@ -539,33 +572,4 @@ module.exports = [
                 }
             }
     },
-    //按浏览数(评论数)排列文章
-    {
-        method: 'GET',
-        path: UtilApi.api_v1 + '/statistics/post',
-        handler: async (request, h) => {
-            try {
-                const res = await act({
-                    role: 'statistics',
-                    cmd: 'sort',
-                    by: request.query.sort_by,
-                    limit: request.query.limit,
-                    range: request.query.sort_range
-                });
-                return Util.response(res, h);
-            } catch (e) {
-                return Util.errorToBoom(e);
-            }
-        },
-        config: {
-            validate: {
-                query: {
-                    limit: Joi.number().integer().default(5),
-                    sort_by: Joi.string().valid(['view', 'comment']).default('view'),
-                    sort_range: Joi.string().valid(['day', 'three day', 'week', 'month', 'year', 'all']).default('week')
-                },
-                failAction: Util.validateErr
-            }
-        }
-    }
 ];
