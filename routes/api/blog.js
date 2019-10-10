@@ -496,7 +496,8 @@ module.exports = [
                     const res = await act({
                         role: 'statistics',
                         cmd: 'count',
-                        type: request.query.type
+                        type: request.query.type,
+                        limit: request.query.limit
                     });
                     return Util.response(res, h);
                 } catch (err) {
@@ -506,7 +507,8 @@ module.exports = [
         config: {
             validate: {
                 query: {
-                    type: Joi.string().valid(['view', 'comment']).default('view'),
+                    limit: Joi.number().integer().default(5),
+                    type: Joi.string().valid(['view', 'comment', 'post']).default('view'),
                 },
                 failAction: Util.validateErr
             }
@@ -538,6 +540,22 @@ module.exports = [
                     rang: Joi.string().valid(['day', 'three day', 'week', 'month', 'year', 'all']).default('week')
                 },
                 failAction: Util.validateErr
+            }
+        }
+    },
+    // 获取存储的统计信息
+    {
+        method: 'GET',
+        path: UtilApi.api_v1 + '/statistics/storage',
+        handler: async (request, h) => {
+            try {
+                const res = await act({
+                    role: 'statistics',
+                    cmd: 'storage'
+                });
+                return Util.response(res, h);
+            } catch (e) {
+                return Util.response();
             }
         }
     },

@@ -36,7 +36,7 @@ module.exports = function (options) {
                 statistics: []
             };
 
-            const times = 10; // 最近10次的统计结果
+            const times = args.limit; // 最近10次的统计结果
             const nowDate = new Date();
             const nowDayOfWeek = nowDate.getDay();//本周第几天
             const nowDay = nowDate.getDate();//当前日
@@ -82,17 +82,17 @@ module.exports = function (options) {
             } else if (args.type === 'post') { // 文章数量
                 for (let i = 0; i > -(times + 1); i--) {
                     const weekRange = Util.getWeekRange(nowYear, nowMonth, nowDay, nowDayOfWeek, i, false);
-                    const res = await Post.find({
+                    const resPost = await Post.find({
                         create_date: {$gte: weekRange[0], $lt: weekRange[1]}
                     });
 
                     if (i === 0) {
-                        res.today = res.length;
+                        res.today = resPost.length;
                     } else {
                         const key = moment(weekRange[0]).format("YYYYMMDD") + "-" + moment(weekRange[1]).format("YYYYMMDD");
                         const d = {
                             'date': key,
-                            'value': res.length
+                            'value': resPost.length
                         };
                         res.statistics.unshift(d);
                     }
@@ -101,26 +101,18 @@ module.exports = function (options) {
             } else if (args.type === 'comment') { // 评论数量
                 for (let i = -times; i <= 0; i++) {
                     const dayRange = Util.getDayRange(nowDate, i);
-                    const res = await Comment.find({create_date: {$gte: dayRange[0], $lt: dayRange[1]}});
+                    const resComment = await Comment.find({create_date: {$gte: dayRange[0], $lt: dayRange[1]}});
                     if (i === 0) {
-                        res.today = res.length;
+                        res.today = resComment.length;
                     } else {
                         const d = {
                             'date': moment(dayRange[0]).format('YYYYMMDD'),
-                            'value': res.length
+                            'value': resComment.length
                         };
                         res.statistics.push(d);
                     }
                 }
                 res.count = await Comment.find().countDocuments();
-            } else if (args.type === 'storage') { // todo 多媒体统计
-                respond({
-                    used: "7Gb",
-                    total: "10Gb",
-                    percent: 70,
-                    mediaCount: 0
-                });
-                return;
             }
             respond(res);
         } catch (e) {
@@ -128,6 +120,21 @@ module.exports = function (options) {
         }
     });
 
+    /**
+     * 获取存储的统计信息
+     */
+    this.add('role:statistics,cmd:storage', async (args, respond) => {
+        respond({
+            used: "7Gb",
+            total: "10Gb",
+            percent: 70,
+            count: 67,
+            picture: 66,
+            music: 6,
+            video: 4,
+            other: 1
+        });
+    });
 
     // 命名有歧义
     // /**
