@@ -12,7 +12,7 @@ const PostSchema = new Schema({
     publishDate: {type: Date},
     cover: {type: String},
     top: {type: Boolean}, //置顶
-    open: {type: String},//公开性 0 公开  1 密码保护 2 私密
+    open: {type: String},//公开性
     password: {type: String},//保护密码
     openComment: {type: Boolean},//是否开放评论
     needReview: {type: Boolean},//评论是否需要审核
@@ -33,7 +33,7 @@ PostSchema.virtual('model')
             createDate: Util.defaultFormat(this.createDate),
             modifyDate: Util.defaultFormat(this.modifyDate),
             publishDate: Util.defaultFormat(this.publishDate),
-            stick: this.stick,
+            top: this.top,
             open: this.open,
             cover: this.cover,
             password: this.password,
@@ -82,7 +82,7 @@ PostSchema.static({
         model.hasOwnProperty('password') ? temp.password = model.password : '';
         model.hasOwnProperty('openComment') ? temp.openComment = model.openComment : '';
         model.hasOwnProperty('needReview') ? temp.needReview = model.needReview : '';
-        model.hasOwnProperty('tag') ? temp.tags = model.tags : '';
+        model.hasOwnProperty('tags') ? temp.tags = model.tags : '';
         model.hasOwnProperty('categories') ? (temp.categories = model.categories ? model.categories : null) : '';
         model.hasOwnProperty('status') ? temp.status = model.status : '';
 

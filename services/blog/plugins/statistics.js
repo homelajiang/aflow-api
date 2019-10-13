@@ -83,7 +83,7 @@ module.exports = function (options) {
                 for (let i = 0; i > -(times + 1); i--) {
                     const weekRange = Util.getWeekRange(nowYear, nowMonth, nowDay, nowDayOfWeek, i, false);
                     const resPost = await Post.find({
-                        create_date: {$gte: weekRange[0], $lt: weekRange[1]}
+                        createDate: {$gte: weekRange[0], $lt: weekRange[1]}
                     });
 
                     if (i === 0) {
@@ -146,6 +146,7 @@ module.exports = function (options) {
 
     /**
      *  获取文章（评论数）排行  今天 近3 天 近7 天 近30 天 近一年 所有
+     *  TODO 需要重新设计
      */
     this.add('role:statistics,cmd:post', async (args, respond) => {
         let startDateTime = getStartDateTime(args.range);
@@ -155,7 +156,7 @@ module.exports = function (options) {
             posts = await Comment.aggregate([
                 {
                     $match: {
-                        create_date: {$gte: startDateTime}
+                        createDate: {$gte: startDateTime}
                     }
                 },
                 {
@@ -210,16 +211,19 @@ module.exports = function (options) {
 
         posts = await Post.populate(posts, {path: 'post'});
 
+        // TODO 2019/10/13 添加评论数量
+        const tempList = [];
         //查找post浏览数
         for (let i = 0; i < posts.length; i++) {
-            posts[i].views = await ViewRecord.find({post: posts[i]._id}).countDocuments();
             const temp = posts[i].post.model;
+            temp.views = await ViewRecord.find({post: posts[i]._id}).countDocuments();
             delete temp.password;
             delete temp.content;
-            posts[i].post = temp;
+            tempList.push(temp);
         }
+        // 整理数据结构为文章列表
 
-        respond(posts);
+        respond(tempList);
     });
 
     // 开启定时任务

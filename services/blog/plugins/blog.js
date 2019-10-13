@@ -23,7 +23,7 @@ module.exports = function (options) {
                 .sort({publish_date: -1});
             const tempList = [];
             posts.forEach((element) => {
-                tempList.push(element.blog_model);
+                tempList.push(element.model);
             });
             respond(null, Util.generatePageModel(pageSize, pageNum, count, tempList));
         } catch (e) {
@@ -46,7 +46,7 @@ module.exports = function (options) {
 
             const tempList = [];
             comments.forEach((element) => {
-                tempList.push(element.blog_model);
+                tempList.push(element.model);
             });
             respond(Util.generatePageModel(pageSize, pageNum, count, tempList));
         } catch (e) {
@@ -60,8 +60,8 @@ module.exports = function (options) {
             const post = await Post.findById(args.id)
                 .populate('categories');
             // 文章存在，并且文章已发布
-            if (post && post.status === 1) {
-                respond(post.blog_model);
+            if (post && post.status === 'published') {
+                respond(post.model);
             } else {
                 respond(Util.generateErr("文章不存在", 404));
             }
@@ -119,17 +119,17 @@ module.exports = function (options) {
             const pageSize = parseInt(args.pageSize);
             const pageNum = parseInt(args.pageNum);
 
-            const count = await Post.find({status: 1, open: {$lt: 2}}).countDocuments();
+            const count = await Post.find({status: 'published', open: {$in: ['public', 'protect']}}).countDocuments();
             let posts = await Post.aggregate(
                 [
                     {
                         $match: {
-                            status: 1, // 已发布
-                            open: {$lt: 2} // 0或1 公开，密码保护
+                            status: 'published', // 已发布
+                            open: {$in: ['public', 'protect']} //公开或者密码保护的
                         }
                     },
                     {
-                        $sort: {publish_date: -1}
+                        $sort: {publishDate: -1}
                     },
                     {
                         $skip: (pageNum - 1) * pageSize
@@ -139,7 +139,7 @@ module.exports = function (options) {
                     },
                     {
                         $group: {
-                            _id: {$year: "$publish_date"},
+                            _id: {$year: "$publishDate"},
                             count: {$sum: 1},
                             posts: {$push: "$_id"}
                         }
@@ -153,7 +153,7 @@ module.exports = function (options) {
             posts = await Post.populate(posts, {path: 'posts'});
             for (let i = 0; i < posts.length; i++) {
                 for (let j = 0; j < posts[i].posts.length; j++) {
-                    posts[i].posts[j] = posts[i].posts[j].archive_model;
+                    posts[i].posts[j] = posts[i].posts[j].model;
                 }
             }
             respond(null, Util.generatePageModel(pageSize, pageNum, count, posts));
