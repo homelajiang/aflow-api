@@ -5,6 +5,8 @@ const Boom = require('@hapi/boom');
 
 module.exports = function (options) {
 
+    const seneca = this;
+
     //添加categories
     this.add('role:categories,cmd:add', async (args, respond) => {
         try {
@@ -49,7 +51,7 @@ module.exports = function (options) {
             if (categories) {
                 respond(categories.model);
             } else {
-                respond(Util.generateErr("该分类不存在",404));
+                respond(Util.generateErr("该分类不存在", 404));
             }
         } catch (e) {
             respond(Util.generateErr("查询失败"));
@@ -93,6 +95,7 @@ module.exports = function (options) {
             respond(Util.generatePageModel(pageSize, pageNum, count, tempList));
         } catch (e) {
             respond(Util.generateErr("获取分类列表失败"));
+            seneca.log.error('categories', e);
         }
     });
 
