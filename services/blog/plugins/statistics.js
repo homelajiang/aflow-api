@@ -227,53 +227,53 @@ module.exports = function (options) {
     });
 
     // 开启定时任务
-    //         schedule.scheduleJob('0 * * * * *', async () => {
-    //             console.log('归档访问记录');
-    //
-    //             //统计过去的一天的数据
-    //             let nowDate = new Date();
-    //             nowDate.setHours(0);
-    //             nowDate.setMinutes(0);
-    //             nowDate.setSeconds(0);
-    //             nowDate.setMilliseconds(0);
-    //
-    //             let preDate = new Date(nowDate.getTime() - 24 * 3600 * 1000);
-    //
-    //             const statistics = {};
-    //             statistics['date'] = preDate;
-    //             statistics['num'] = await ViewRecord.find({
-    //                 date: {$gte: preDate, $lt: nowDate}
-    //             }).countDocuments();
-    //
-    //             statistics['post'] = await ViewRecord.aggregate([
-    //                 {
-    //                     $match: {
-    //                         date: {$gte: preDate, $lt: nowDate},
-    //                         post: {$ne: null}
-    //                     }
-    //                 }, {
-    //                     $group: {
-    //                         _id: '$post',
-    //                         num: {$sum: 1}
-    //                     }
-    //                 }
-    //             ]);
-    //              //评论信息直接使用Comment表进行统计
-    //             // statistics['comment'] = await Comment.aggregate([
-    //             //     {
-    //             //         $match: {
-    //             //             createDate: {$gte: preDate, $lt: nowDate}
-    //             //         }
-    //             //     }, {
-    //             //         $group: {
-    //             //             _id: '$post',
-    //             //             num: {$sum: 1}
-    //             //         }
-    //             //     }
-    //             // ]);
-    //
-    //             await new Statistics(statistics).save();
-    //         });
+            schedule.scheduleJob('0 0 1 * * *', async () => {
+                console.log('归档访问记录');
+
+                //统计过去的一天的数据
+                let nowDate = new Date();
+                nowDate.setHours(0);
+                nowDate.setMinutes(0);
+                nowDate.setSeconds(0);
+                nowDate.setMilliseconds(0);
+
+                let preDate = new Date(nowDate.getTime() - 24 * 3600 * 1000);
+
+                const statistics = {};
+                statistics['date'] = preDate;
+                statistics['num'] = await ViewRecord.find({
+                    date: {$gte: preDate, $lt: nowDate}
+                }).countDocuments();
+
+                statistics['post'] = await ViewRecord.aggregate([
+                    {
+                        $match: {
+                            date: {$gte: preDate, $lt: nowDate},
+                            post: {$ne: null}
+                        }
+                    }, {
+                        $group: {
+                            _id: '$post',
+                            num: {$sum: 1}
+                        }
+                    }
+                ]);
+                 //评论信息直接使用Comment表进行统计
+                // statistics['comment'] = await Comment.aggregate([
+                //     {
+                //         $match: {
+                //             createDate: {$gte: preDate, $lt: nowDate}
+                //         }
+                //     }, {
+                //         $group: {
+                //             _id: '$post',
+                //             num: {$sum: 1}
+                //         }
+                //     }
+                // ]);
+
+                await new Statistics(statistics).save();
+            });
 
     // 获取指定时间的开始
     function getStartDateTime(type) {
