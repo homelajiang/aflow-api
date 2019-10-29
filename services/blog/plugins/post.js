@@ -1,6 +1,7 @@
 const Post = require('../../../models/post');
 const Categories = require('../../../models/categories');
 const Util = require('../../util');
+const Logger = require('../../logger');
 /*const async = require('async');
 const seneca = require('seneca')();
 seneca
@@ -159,6 +160,7 @@ module.exports = function (options) {
             respond(Util.generatePageModel(pageSize, pageNum, count, tempList));
         } catch (e) {
             respond(Util.generateErr("查询失败"));
+            Logger.error(e);
         }
     });
 
