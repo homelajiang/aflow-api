@@ -1,7 +1,10 @@
 const Categories = require('../../../models/categories');
 const Util = require('../../util');
 const Boom = require('@hapi/boom');
-
+const Path = require('path');
+const IMAGE_ROOT = Path.resolve(__dirname, '../../../public');
+const fs = require('fs');
+const parentDir = Path.join(IMAGE_ROOT, 'uploads');
 
 module.exports = function (options) {
 
@@ -24,6 +27,17 @@ module.exports = function (options) {
         try {
             const res = await Categories.findOneAndDelete({_id: args.id});
             if (res) {
+                // 删除分类时，删除文件
+                if(res.image){
+                    const pathFormat = res.image.split("/upload/")
+                    if(pathFormat.length===2){
+                        const targetPath = Path.join(parentDir, pathFormat[1]);
+                        // 如果路径存在并且是文件
+                        if(fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()){
+                            fs.unlinkSync(targetPath); // 进行删除
+                        }
+                    }
+                }
                 respond(res.model);
             } else {
                 respond(Util.generateErr("该分类不存在"));

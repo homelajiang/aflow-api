@@ -6,6 +6,12 @@ seneca
     .use("basic")
     .use("entity");*/
 
+const Path = require('path');
+const IMAGE_ROOT = Path.resolve(__dirname, '../../../public');
+const fs = require('fs');
+const parentDir = Path.join(IMAGE_ROOT, 'uploads');
+
+
 module.exports = function (options) {
     this.add('role:file,cmd:add', async (args, respond) => {
         try {
@@ -25,14 +31,14 @@ module.exports = function (options) {
             let files;
 
             if (args.key) {
-                count = await File.find()
+                count = await File.find({protected: false})
                     .or([
                         {name: {$regex: new RegExp(args.key, 'i')}},
                         {description: {$regex: new RegExp(args.key, 'i')}}
                     ])
                     .countDocuments();
 
-                files = await File.find()
+                files = await File.find({protected: false})
                     .or([
                         {name: {$regex: new RegExp(args.key, 'i')}},
                         {description: {$regex: new RegExp(args.key, 'i')}}
@@ -41,8 +47,8 @@ module.exports = function (options) {
                     .limit(pageSize)
                     .sort({create_date: -1});
             } else {
-                count = await File.find().countDocuments();
-                files = await File.find()
+                count = await File.find({protected: false}).countDocuments();
+                files = await File.find({protected: false})
                     .skip((pageNum - 1) * pageSize)
                     .limit(pageSize)
                     .sort({create_date: -1});
@@ -63,6 +69,11 @@ module.exports = function (options) {
         try {
             const res = await File.findOneAndDelete({_id: args.id});
             if (res) {
+                const targetPath = Path.join(parentDir, res.path);
+                // 如果路径存在并且是文件
+                if(fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()){
+                    fs.unlinkSync(targetPath); // 进行删除
+                }
                 respond(res.model);
             } else {
                 respond(Util.generateErr("文件不存在", 404));

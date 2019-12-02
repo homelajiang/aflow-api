@@ -141,9 +141,12 @@ module.exports = [
                         role: 'file',
                         cmd: 'add',
                         file: {
-                            name: fileName,
+                            name: fileFormat[0],
                             path: datetimeDir + "/" + targetName,
-                            mimetype: request.payload.file.hapi.headers["content-type"]
+                            mimeType: request.payload.file.hapi.headers["content-type"],
+                            suffixName: fileFormat[fileFormat.length - 1],
+                            size: request.payload.file._data.length,
+                            open: request.payload.open
                         }
                     });
 

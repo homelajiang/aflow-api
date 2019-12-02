@@ -7,9 +7,12 @@ const fileSchema = new Schema({
     name: {type: String, require: true},
     path: {type: String, require: true},
     description: String,
-    mimetype: String,
-    create_date: {type: Date},
-    modify_date: {type: Date}
+    mimeType: String,
+    createDate: {type: Date},
+    modifyDate: {type: Date},
+    suffixName: String,
+    size: Number,
+    protected: {type: Boolean, default: false}
 
 }, {
     versionKey: false // You should be aware of the outcome after set to false
@@ -22,9 +25,11 @@ fileSchema.virtual('model')
             name: this.name,
             path: BAST_URL + "upload/" + this.path,
             description: this.description,
-            mimetype: this.mimetype,
-            create_date: Util.defaultFormat(this.create_date),
-            modify_date: Util.defaultFormat(this.modify_date)
+            mimeType: this.mimeType,
+            suffixName: this.suffixName,
+            size: this.size,
+            createDate: Util.defaultFormat(this.createDate),
+            modifyDate: Util.defaultFormat(this.modifyDate)
         }
     });
 
@@ -34,18 +39,20 @@ fileSchema.static({
         model.name ? temp.name = model.name : '';
         model.path ? temp.path = model.path : '';
         model.description ? temp.description = model.description : '';
-        model.mimetype ? temp.mimetype = model.mimetype : '';
-        temp.create_date = Date.now();
-        temp.modify_date = Date.now();
+        model.mimeType ? temp.mimeType = model.mimeType : '';
+        model.suffixName ? temp.suffixName = model.suffixName : '';
+        model.size ? temp.size = model.size : 0;
+        temp.createDate = Date.now();
+        temp.modifyDate = Date.now();
+        temp.protected = !!model.open;
         return temp;
     },
     getUpdateModel: function (model) {
         let temp = {
-            modify_date: Date.now()
+            modifyDate: Date.now()
         };
         model.name ? temp.name = model.name : '';
-        if(model.description!==undefined)
-        model.description!==undefined ? temp.description = model.description : '';
+        model.description !== undefined ? temp.description = model.description : '';
         return temp;
     }
 });
