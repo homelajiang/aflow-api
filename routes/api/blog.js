@@ -414,9 +414,8 @@ module.exports = [
                     id: Joi.string().required()
                 },
                 payload: {
-                    delete_reason: Joi.string(),
-                    status:
-                        Joi.number().integer().min(-1).max(1).required()
+                    deleteReason: Joi.string(),
+                    status: Joi.string().valid('review', 'published', 'deleted').required()
                 }
             }
         }

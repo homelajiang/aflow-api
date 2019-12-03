@@ -152,7 +152,7 @@ module.exports = function (options) {
     //修改comment
     this.add('role:comment,cmd:update', async (args, respond) => {//修改不检查重复
         try {
-            await Comment.updateOne({_id: args.id}, Comment.getUpdateModel(args.comment));
+            await Comment.updateOne({_id: args.id}, {$set: Comment.getUpdateModel(args.comment)});
             const comment = await Comment.findOne({_id: args.id})
                 .populate("post");
             respond(comment.model);

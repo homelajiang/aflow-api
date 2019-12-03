@@ -49,9 +49,13 @@ CommentSchema.static({
         return temp;
     },
     getUpdateModel: function (model) {
-        return {
+        let temp = {
             modifyDate: new Date()
         };
+
+        model.deleteReason ? temp.deleteReason = model.deleteReason : '';
+        model.status ? temp.status = model.status : '';
+        return temp;
     }
 });
 
